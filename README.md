@@ -62,6 +62,22 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Curl Sample
+
+```bash
+// process 'happy-birthday' notification for user-b who belongs to company-b. sample data is created in migrations folder
+curl --location 'http://localhost:3000/notification' \
+--header 'Content-Type: application/json' \
+--data '{
+    "notificationType": "happy-birthday",
+    "userID": "user-b",
+    "companyID": "company-b"
+}'
+
+// get ui notification for user-b
+curl --location 'http://localhost:3000/notification?userID=user-b'
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
