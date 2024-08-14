@@ -11,8 +11,8 @@ export class NotificationRepository implements NotificationRepositoryInterface {
     @InjectModel(NotificationMongoose.name) private readonly notificationModel: Model<Notification>,
   ) {}
 
-  async findByEntityIDAndEntityType(id: string, type: string): Promise<Notification[]> {
-    return this.notificationModel.find({ entityID: id, entityType: type }).exec();
+  async findByUserID(id: string): Promise<Notification[]> {
+    return this.notificationModel.find({ userID: id }).exec();
   }
 
   async create(notification: Partial<Notification>): Promise<Notification> {

@@ -8,10 +8,10 @@ export class Notification extends Document implements GeneralNotification {
   notificationType: string;
 
   @Prop({ required: true })
-  entityID: string;
+  userID: string;
 
   @Prop({ required: true })
-  entityType: string;
+  companyID: string;
 
   @Prop()
   createdAt: Date;

@@ -1,7 +1,7 @@
 export interface Notification {
     // id?: string; // Optional to handle auto-generated IDs
     notificationType: string;
-    entityID: string;
-    entityType: string;
+    userID: string;
+    companyID: string;
     createdAt: Date;
 }
