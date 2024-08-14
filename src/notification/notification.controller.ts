@@ -6,16 +6,17 @@ import { Notification } from './models/notification.models';
 export class NotificationController {
     constructor(private readonly notificationService: NotificationService) { }
 
+    // TODO: error handler e.g. notification type does not exist
     @Post()
     async process(@Body() notification: Notification) {
         return this.notificationService.process(notification);
     }
 
+    // TODO: should add pagination
     @Get()
-    async getContent(
-        @Query('notificationType') notificationType: string,
-        @Query('notificationChannel') notificationChannel: string
+    async getNotifications(
+        @Query('userID') userID: string
     ) {
-        return this.notificationService.getContent(notificationType, notificationChannel);
+        return this.notificationService.getNotification(userID);
     }
 }

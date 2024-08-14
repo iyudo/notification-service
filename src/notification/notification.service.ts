@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { NotificationRepository } from './repository/notification.repository';
 import { NotificationChannelRepository } from './repository/notification-channel.repository';
 import { NotificationChannelSubscriptionRepository } from './repository/notification-channel-subscription.repository';
 import { NotificationContentRepository } from './repository/notification-content.repository';
@@ -11,6 +12,7 @@ import * as Mustache from 'mustache';
 @Injectable()
 export class NotificationService {
     constructor(
+        @Inject('NotificationRepository') private readonly notificationRepository: NotificationRepository,
         @Inject('NotificationChannelRepository') private readonly notificationChannelRepository: NotificationChannelRepository,
         @Inject('NotificationChannelSubscriptionRepository') private readonly notificationChannelSubscriptionRepository: NotificationChannelSubscriptionRepository,
         @Inject('NotificationContentRepository') private readonly notificationContentRepository: NotificationContentRepository,
@@ -18,16 +20,8 @@ export class NotificationService {
         private readonly notificationContentStrategy: NotificationContentStrategyFactory
     ) { }
 
-    async getContent(type: string, channel: string): Promise<NotificationContent> {
-        const content = await this.notificationContentRepository.findByNotificationTypeAndChannel(type, channel);
-        const temp = content.notificationContent.content;
-        const userRecord: Record<string, string> = {
-            "companyName": "Apple",
-            "firstName": "Bob",
-            "user3": "Charlie"
-        };
-        content.notificationContent.content = Mustache.render(temp, userRecord);
-        return content
+    async getNotification(userID: string): Promise<Notification[]> {
+        return this.notificationRepository.findByUserID(userID);
     }
 
     async process(notification: Notification) {
