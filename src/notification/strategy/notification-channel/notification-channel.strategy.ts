@@ -1,4 +1,7 @@
+import { Notification } from '../../models/notification.models';
+
 export interface NotificationChannelStrategy {
     // need to handle error
-    execute()
+    processNotification(notification: Notification)
+    sendNotification(userID: string, payload: any)
 }

@@ -4,14 +4,14 @@ import { NotificationChannelStrategy } from '../strategy/notification-channel/no
 @Injectable()
 export class NotificationChannelStrategyFactory {
   constructor(
-    @Inject('STRATEGIES')
+    @Inject('NotificationChannelStrategyProvider')
     private strategies: Map<string, NotificationChannelStrategy>
   ) {}
 
   getStrategy(strategyType: string): NotificationChannelStrategy {
     const strategy = this.strategies.get(strategyType);
     if (!strategy) {
-      throw new Error(`Strategy ${strategyType} not found`);
+      throw new Error(`Notification Strategy ${strategyType} not found`);
     }
     return strategy;
   }
