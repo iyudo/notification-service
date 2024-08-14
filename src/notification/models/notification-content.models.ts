@@ -1,4 +1,5 @@
 export interface NotificationContent {
+    notificationType: string;
     notificationChannel: string;
-    notificationContent: string;
+    notificationContent: Record<string, string>;
 }

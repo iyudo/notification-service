@@ -1,5 +1,5 @@
 import { NotificationContent } from '../models/notification-content.models';
 
 export interface NotificationContentRepository {
-  findByNotificationChannel(channel: string): Promise<NotificationContent>;
+  findByNotificationTypeAndChannel(type: string, channel: string): Promise<NotificationContent>;
 }
