@@ -39,15 +39,26 @@ $ npx migrate-mongo up
 ## Running the app
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ docker compose up --build
 ```
+
+## Stopping the app
+
+```bash
+$ docker compose down
+```
+
+## Trouble Shooting
+
+When custom-migration fail to execute, it usually because there is dirty mongo volume created locally. to fix this you could try to run the following command
+
+```bash
+$ docker compose down
+
+$ docker volume remove notification-service_mongo-data
+```
+
+And you could try to run the app again
 
 ## Test
 
@@ -81,12 +92,6 @@ curl --location 'http://localhost:3000/notification?userID=user-b'
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
