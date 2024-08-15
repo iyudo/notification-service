@@ -2,7 +2,7 @@
 
 const config = {
   mongodb: {
-    url: "mongodb://admin:password@localhost:27017",
+    url: "mongodb://admin:password@mongo:27017",
 
     databaseName: "notifications",
 

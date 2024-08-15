@@ -7,13 +7,20 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      mongo:
-        condition: service_healthy
+      custom-migration:
+        condition: service_completed_successfully
     environment:
       MONGO_URI: mongodb://admin:password@mongo:27017/notifications?authSource=admin
-    volumes:
-      - .:/app
-      - /app/node_modules
+    networks:
+      - app-network
+  
+  custom-migration:
+    build:
+      context: .
+      dockerfile: migrations/Dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
     networks:
       - app-network
 

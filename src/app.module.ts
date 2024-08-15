@@ -8,16 +8,10 @@ import { UserModule } from './user/user.module';
 @Module({
   imports: [
     NotificationModule,
-    // MongooseModule.forRoot(process.env.MONGO_URI),
-    MongooseModule.forRoot('mongodb://admin:password@localhost:27017/notifications?authSource=admin'),
+    MongooseModule.forRoot(process.env.MONGO_URI),
     UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor() {
-    console.log("Greetings from AppModule");
-    console.log(process.env.MONGO_URI);
-  }
-}
+export class AppModule {}
