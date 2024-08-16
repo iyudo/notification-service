@@ -36,7 +36,7 @@ export class NotificationService {
         companyNotificationChannels.forEach(element => channelSet.add(element));
         // console.log("channelSet:", channelSet);
 
-        configurationNotificationChannels.forEach(async element => {
+        for (const element of configurationNotificationChannels) {
             if (channelSet.has(element)) {
                 const channelStrategy = this.notificationChannelStrategy.getStrategy(element);
                 const contentStrategy = this.notificationContentStrategy.getStrategy(notification.notificationType, element);
@@ -48,6 +48,6 @@ export class NotificationService {
                 }
                 channelStrategy.sendNotification(notification.userID, content.notificationContent);
             }
-        });
+        }
     }
 }

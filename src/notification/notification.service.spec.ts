@@ -20,6 +20,10 @@ describe('NotificationService', () => {
   let notificationChannelRepository: NotificationChannelRepository
   let notificationChannelSubscriptionRepository: NotificationChannelSubscriptionRepository
   let notificationContentRepository: NotificationContentRepository
+  let emailChannelStrategy: EmailChannelStrategy
+  let uiChannelStrategy: UIChannelStrategy
+  let happyBirthdayUIStrategy: HappyBirthdayUIStrategy
+  let happyBirthdayEmailStrategy: HappyBirthdayEmailStrategy
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,43 +32,57 @@ describe('NotificationService', () => {
       ],
       providers: [
         NotificationService,
-        NotificationChannelStrategyFactory,
-        UIChannelStrategy,
-        EmailChannelStrategy,
         NotificationService,
+        NotificationChannelStrategyFactory,
         NotificationContentStrategyFactory,
-        HappyBirthdayUIStrategy,
-        HappyBirthdayEmailStrategy,
+        {
+          provide: HappyBirthdayUIStrategy,
+          useValue: {
+            getContentObject: jest.fn()
+          },
+        },
+        {
+          provide: HappyBirthdayEmailStrategy,
+          useValue: {
+            getContentObject: jest.fn()
+          },
+        },
+        {
+          provide: EmailChannelStrategy,
+          useValue: {
+            processNotification: jest.fn(),
+            sendNotification: jest.fn()
+          },
+        },
+        {
+          provide: UIChannelStrategy,
+          useValue: {
+            processNotification: jest.fn(),
+            sendNotification: jest.fn()
+          },
+        },
         {
           provide: 'NotificationRepository',
           useValue: {
-            // Mock the methods of your repository here
             findByUserID: jest.fn()
-            // Add other methods as needed
           },
         },
         {
           provide: 'NotificationChannelRepository',
           useValue: {
-            // Mock the methods of your repository here
-            findByUserID: jest.fn()
-            // Add other methods as needed
+            findByNotificationType: jest.fn()
           },
         },
         {
           provide: 'NotificationChannelSubscriptionRepository',
           useValue: {
-            // Mock the methods of your repository here
-            findByUserID: jest.fn()
-            // Add other methods as needed
+            findByEntityIDAndEntityType: jest.fn()
           },
         },
         {
           provide: 'NotificationContentRepository',
           useValue: {
-            // Mock the methods of your repository here
-            findByUserID: jest.fn()
-            // Add other methods as needed
+            findByNotificationTypeAndChannel: jest.fn()
           },
         },
         {
@@ -104,6 +122,10 @@ describe('NotificationService', () => {
     notificationChannelRepository = module.get('NotificationChannelRepository');
     notificationChannelSubscriptionRepository = module.get('NotificationChannelSubscriptionRepository');
     notificationContentRepository = module.get('NotificationContentRepository');
+    emailChannelStrategy = module.get(EmailChannelStrategy);
+    uiChannelStrategy = module.get(UIChannelStrategy);
+    happyBirthdayEmailStrategy = module.get(HappyBirthdayEmailStrategy);
+    happyBirthdayUIStrategy = module.get(HappyBirthdayUIStrategy);
   });
 
   it('should be defined', () => {
@@ -113,15 +135,15 @@ describe('NotificationService', () => {
   describe('getNotification', () => {
     it('should call repository findByUserID method', async () => {
       const mockResult = [
-        { 
-          notificationType: "notification-a", 
+        {
+          notificationType: "notification-a",
           userID: 'user-a',
           companyID: 'company-a',
           createdAt: null
         }
       ];
       jest.spyOn(notificationRepository, 'findByUserID').mockResolvedValue(mockResult);
-  
+
       const result = await service.getNotification("some-id");
       expect(result).toEqual(mockResult);
       expect(notificationRepository.findByUserID).toHaveBeenCalledTimes(1);
@@ -129,7 +151,111 @@ describe('NotificationService', () => {
   });
 
   describe('process', () => {
-    it('should process notification', async () => {
+    beforeEach(() => {
+      jest.spyOn(notificationChannelRepository, 'findByNotificationType').mockImplementation(async (notificationType: string) => {
+        switch (notificationType) {
+          case 'leave-balance-reminder':
+            return ['ui']
+          case 'monthly-payslip':
+            return ['email']
+          case 'happy-birthday':
+            return ['ui', 'email']
+          default:
+            return []
+        }
+      });
+      jest.spyOn(notificationChannelSubscriptionRepository, 'findByEntityIDAndEntityType').mockImplementation(async (id: string, type: string) => {
+        switch (type) {
+          case 'user':
+            switch (id) {
+              case ('user-a'):
+                return ['ui']
+              case ('user-b'):
+                return ['email']
+              case ('user-c'):
+                return ['ui']
+              default:
+                return []
+            }
+          case 'company':
+            switch (id) {
+              case ('company-a'):
+                return ['ui']
+              case ('company-b'):
+                return ['email']
+              case ('company-c'):
+                return ['email']
+              default:
+                return []
+            }
+          default:
+            return []
+        }
+      });
+      jest.spyOn(notificationContentRepository, 'findByNotificationTypeAndChannel').mockResolvedValue({
+        notificationType: 'any-type',
+        notificationChannel: 'any-channel',
+        notificationContent: {
+          'content': 'content'
+        }
+      });
+    });
+    
+    it('should process ui notification for user-a and company-a', async () => {
+      const input = {
+        notificationType: 'happy-birthday',
+        userID: 'user-a',
+        companyID: 'company-a',
+        createdAt: null,
+      };
+
+      await service.process(input);
+
+      expect(uiChannelStrategy.processNotification).toHaveBeenCalledTimes(1);
+      expect(uiChannelStrategy.sendNotification).toHaveBeenCalledTimes(1);
+      expect(uiChannelStrategy.processNotification).toHaveBeenCalledWith(input);
+      
+      expect(happyBirthdayUIStrategy.getContentObject).toHaveBeenCalledTimes(1);
+    });
+
+    it('should process email notification for user-b and company-b', async () => {
+      const input = {
+        notificationType: 'happy-birthday',
+        userID: 'user-b',
+        companyID: 'company-b',
+        createdAt: null,
+      };
+
+      await service.process(input);
+
+      expect(emailChannelStrategy.processNotification).toHaveBeenCalledTimes(1);
+      expect(emailChannelStrategy.sendNotification).toHaveBeenCalledTimes(1);
+      expect(emailChannelStrategy.processNotification).toHaveBeenCalledWith(input);
+      
+      expect(happyBirthdayEmailStrategy.getContentObject).toHaveBeenCalledTimes(1);
+    });
+
+    it('should process both ui and email notification for user-c and company-c', async () => {
+      const input = {
+        notificationType: 'happy-birthday',
+        userID: 'user-c',
+        companyID: 'company-c',
+        createdAt: null,
+      };
+
+      await service.process(input);
+      
+      expect(uiChannelStrategy.processNotification).toHaveBeenCalledTimes(1);
+      expect(uiChannelStrategy.sendNotification).toHaveBeenCalledTimes(1);
+      expect(uiChannelStrategy.processNotification).toHaveBeenCalledWith(input);
+      
+      expect(happyBirthdayUIStrategy.getContentObject).toHaveBeenCalledTimes(1);
+
+      expect(emailChannelStrategy.processNotification).toHaveBeenCalledTimes(1);
+      expect(emailChannelStrategy.sendNotification).toHaveBeenCalledTimes(1);
+      expect(emailChannelStrategy.processNotification).toHaveBeenCalledWith(input);
+      
+      expect(happyBirthdayEmailStrategy.getContentObject).toHaveBeenCalledTimes(1);
     });
   });
 });
