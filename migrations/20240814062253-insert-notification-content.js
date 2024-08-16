@@ -16,6 +16,21 @@ module.exports = {
           content: '{{companyName}} is wishing you a happy birthday, etc.'
         } 
       },
+      { 
+        notificationType: 'leave-balance-reminder',
+        notificationChannel: 'ui', 
+        notificationContent: {
+          content: 'Hi {{firstName}} you still have remaining leave balance'
+        } 
+      },
+      { 
+        notificationType: 'monthly-payslip',
+        notificationChannel: 'email', 
+        notificationContent: {
+          subject: 'Monthly Payslip for {{firstName}}',
+          content: 'You have received a monthly payslip from {{companyName}}'
+        } 
+      },
     ]);
   },
 

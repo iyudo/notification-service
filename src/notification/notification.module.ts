@@ -19,6 +19,8 @@ import { NotificationContentStrategyFactory } from './factory/notification-conte
 import { NotificationContentStrategy } from './strategy/notification-content/notification-content.strategy';
 import { HappyBirthdayUIStrategy } from './strategy/notification-content/happy-birthday-ui.strategy';
 import { HappyBirthdayEmailStrategy } from './strategy/notification-content/happy-birthday-email.strategy';
+import { LeaveBalanceReminderUIStrategy } from './strategy/notification-content/leave-balance-reminder-ui.strategy';
+import { MonthlyPayslipEmailStrategy } from './strategy/notification-content/monthly-payslip-email.strategy';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { HappyBirthdayEmailStrategy } from './strategy/notification-content/happ
     NotificationContentStrategyFactory,
     HappyBirthdayUIStrategy,
     HappyBirthdayEmailStrategy,
+    LeaveBalanceReminderUIStrategy,
+    MonthlyPayslipEmailStrategy,
     {
       provide: 'NotificationRepository',
       useClass: NotificationRepository
@@ -67,7 +71,9 @@ import { HappyBirthdayEmailStrategy } from './strategy/notification-content/happ
       provide: 'NotificationContentStrategyProvider',
       useFactory: (
         strategyHappyBirthdayUI: HappyBirthdayUIStrategy, 
-        strategyHappyBirthdayEmail: HappyBirthdayEmailStrategy
+        strategyHappyBirthdayEmail: HappyBirthdayEmailStrategy,
+        strategyLeaveBalanceReminderUI: LeaveBalanceReminderUIStrategy,
+        strategyMonthlyPayslipEmail: MonthlyPayslipEmailStrategy
       ) => {
         const strategyMap = new Map<string, Map<string, NotificationContentStrategy>>();
         strategyMap.set('ui', new Map<string, NotificationContentStrategy>());
@@ -75,11 +81,17 @@ import { HappyBirthdayEmailStrategy } from './strategy/notification-content/happ
 
         strategyMap.get('ui').set('happy-birthday', strategyHappyBirthdayUI);
         strategyMap.get('email').set('happy-birthday', strategyHappyBirthdayEmail);
+
+        strategyMap.get('ui').set('leave-balance-reminder', strategyLeaveBalanceReminderUI);
+
+        strategyMap.get('email').set('monthly-payslip', strategyMonthlyPayslipEmail);
         return strategyMap;
       },
       inject: [
         HappyBirthdayUIStrategy, 
-        HappyBirthdayEmailStrategy
+        HappyBirthdayEmailStrategy,
+        LeaveBalanceReminderUIStrategy,
+        MonthlyPayslipEmailStrategy
       ],
     },
   ]
